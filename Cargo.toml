@@ -1,0 +1,8 @@
+[package]
+name = "clap-ext"
+version = "0.1.0"
+description = "An opinionated Clap setup"
+authors = ["Sky Mavis Engineering <engineering@skymavis.com>"]
+
+[dependencies]
+clap = "^2.33.0"
