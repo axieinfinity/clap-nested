@@ -1,8 +1,21 @@
 [package]
 name = "clap-ext"
 version = "0.1.0"
-description = "An opinionated Clap setup"
+description = "A preconfigured Clap setup for nested commands."
 authors = ["Sky Mavis Engineering <engineering@skymavis.com>"]
+license = "MIT"
+homepage = "https://github.com/axieinfinity/clap-ext"
+repository = "https://github.com/axieinfinity/clap-ext"
+categories = ["command-line-interface"]
+keywords = ["clap", "cli"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+all-features = true
+
+[badges]
+travis-ci = { repository = "axieinfinity/clap-ext", branch = "master" }
+maintenance = { status = "passively-maintained" }
 
 [dependencies]
 clap = "^2.33.0"
