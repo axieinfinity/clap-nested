@@ -1,20 +1,20 @@
 [package]
-name = "clap-ext"
+name = "clap-nested"
 version = "0.1.0"
 description = "A preconfigured Clap setup for nested commands."
 authors = ["Sky Mavis Engineering <engineering@skymavis.com>"]
 license = "MIT"
-homepage = "https://github.com/axieinfinity/clap-ext"
-repository = "https://github.com/axieinfinity/clap-ext"
+homepage = "https://github.com/axieinfinity/clap-nested"
+repository = "https://github.com/axieinfinity/clap-nested"
 categories = ["command-line-interface"]
-keywords = ["clap", "cli"]
+keywords = ["clap", "nested", "cli"]
 readme = "README.md"
 
 [package.metadata.docs.rs]
 all-features = true
 
 [badges]
-travis-ci = { repository = "axieinfinity/clap-ext", branch = "master" }
+travis-ci = { repository = "axieinfinity/clap-nested", branch = "master" }
 maintenance = { status = "passively-maintained" }
 
 [dependencies]
