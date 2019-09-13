@@ -8,6 +8,7 @@ homepage = "https://github.com/skymavis/clap-nested"
 repository = "https://github.com/skymavis/clap-nested"
 categories = ["command-line-interface"]
 keywords = ["clap", "clap-rs", "nested", "multi-level", "cli", "command-line"]
+include = ["src/**/*", "LICENSE", "README.md"]
 readme = "README.md"
 
 [package.metadata.docs.rs]
