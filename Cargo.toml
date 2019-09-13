@@ -1,13 +1,13 @@
 [package]
 name = "clap-nested"
 version = "0.1.0"
-description = "A preconfigured Clap setup for nested commands."
+description = "A convenient `clap` setup for multi-level CLI commands."
 authors = ["Sky Mavis Engineering <engineering@skymavis.com>"]
 license = "MIT"
 homepage = "https://github.com/axieinfinity/clap-nested"
 repository = "https://github.com/axieinfinity/clap-nested"
 categories = ["command-line-interface"]
-keywords = ["clap", "nested", "cli"]
+keywords = ["clap", "clap-rs", "nested", "multi-level", "cli", "command-line"]
 readme = "README.md"
 
 [package.metadata.docs.rs]
