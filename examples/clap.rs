@@ -40,7 +40,7 @@ fn main() {
             println!("Running foo, env = {}, debug = {}", env, debug);
         }
 
-        ("bar", Some(matches)) => println!("Running bar, env = {}", env),
+        ("bar", Some(_matches)) => println!("Running bar, env = {}", env),
 
         _ => println!("No subcommand matched."),
     }
