@@ -4,8 +4,8 @@ version = "0.1.0"
 description = "A convenient `clap` setup for multi-level CLI commands."
 authors = ["Sky Mavis Engineering <engineering@skymavis.com>"]
 license = "MIT"
-homepage = "https://github.com/axieinfinity/clap-nested"
-repository = "https://github.com/axieinfinity/clap-nested"
+homepage = "https://github.com/skymavis/clap-nested"
+repository = "https://github.com/skymavis/clap-nested"
 categories = ["command-line-interface"]
 keywords = ["clap", "clap-rs", "nested", "multi-level", "cli", "command-line"]
 readme = "README.md"
@@ -14,9 +14,9 @@ readme = "README.md"
 all-features = true
 
 [badges]
-travis-ci = { repository = "axieinfinity/clap-nested", branch = "master" }
-is-it-maintained-issue-resolution = { repository = "axieinfinity/clap-nested" }
-is-it-maintained-open-issues = { repository = "axieinfinity/clap-nested" }
+travis-ci = { repository = "skymavis/clap-nested", branch = "master" }
+is-it-maintained-issue-resolution = { repository = "skymavis/clap-nested" }
+is-it-maintained-open-issues = { repository = "skymavis/clap-nested" }
 maintenance = { status = "passively-maintained" }
 
 [dependencies]

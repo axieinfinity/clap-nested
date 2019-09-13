@@ -2,7 +2,7 @@
 
 [![Cargo Crate](https://img.shields.io/crates/v/clap-nested.svg)](https://crates.io/crates/clap-nested)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Build Status](https://travis-ci.com/axieinfinity/clap-nested.svg?branch=master)](https://travis-ci.com/axieinfinity/clap-nested)
+[![Build Status](https://travis-ci.com/skymavis/clap-nested.svg?branch=master)](https://travis-ci.com/skymavis/clap-nested)
 
 A convenient [`clap`][clap] setup for multi-level CLI subcommands.
 
