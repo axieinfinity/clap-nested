@@ -270,25 +270,25 @@ impl Help {
 
 #[test]
 fn two_level_commander() {
-    let help = Command::new("help")
-        .description("Shows help")
+    let foo = Command::new("foo")
+        .description("Shows foo")
         .runner(|args, matches| {
-            println!("help: {:?} {:?}", args, matches);
+            println!("foo: {:?} {:?}", args, matches);
         });
 
-    let version = Command::new("version")
-        .description("Shows version")
+    let bar = Command::new("bar")
+        .description("Shows bar")
         .runner(|args, matches| {
-            println!("version: {:?} {:?}", args, matches);
+            println!("bar: {:?} {:?}", args, matches);
         });
 
-    let test = Commander::new()
-        .add_cmd(help)
-        .add_cmd(version)
+    let show = Commander::new()
+        .add_cmd(foo)
+        .add_cmd(bar)
         .no_cmd(|args, matches| {
-            println!("version: {:?} {:?}", args, matches);
+            println!("show: {:?} {:?}", args, matches);
         })
-        .into_cmd("test", "Tests things");
+        .into_cmd("show", "Shows things");
 
     let what = Command::new("what")
         .description("So what")
@@ -296,7 +296,7 @@ fn two_level_commander() {
             println!("what: {:?} {:?}", args, matches);
         });
 
-    let main = Commander::new().add_cmd(test).add_cmd(what);
+    let main = Commander::new().add_cmd(show).add_cmd(what);
 
     main.run(&());
 }
