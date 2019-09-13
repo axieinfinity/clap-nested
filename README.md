@@ -44,33 +44,34 @@ awkward process.
 With `clap-nested`, we can write it in a more organized way:
 
 ```rust
-// foo.rs
-pub fn foo<'a>() -> Command<'a, str> {
-    Command::new(file_stem!())
-        .description("Shows foo")
-        .options(|app| {
-            app.arg(
-                Arg::with_name("debug")
-                    .short("d")
-                    .help("Prints debug information verbosely"),
-            )
-        })
-        .runner(|args, matches| {
-            let debug = clap::value_t!(matches, "debug", bool).unwrap_or_default();
-            println!("Running foo, env = {}, debug = {}", args, debug);
-        })
+mod foo {
+    pub fn cmd<'a>() -> Command<'a, str> {
+        Command::new("foo")
+            .description("Shows foo")
+            .options(|app| {
+                app.arg(
+                    Arg::with_name("debug")
+                        .short("d")
+                        .help("Prints debug information verbosely"),
+                )
+            })
+            .runner(|args, matches| {
+                let debug = clap::value_t!(matches, "debug", bool).unwrap_or_default();
+                println!("Running foo, env = {}, debug = {}", args, debug);
+            })
+    }
 }
 
-// bar.rs
-pub fn bar<'a>() -> Command<'a, str> {
-    Command::new(file_stem!())
-        .description("Shows bar")
-        .runner(|args, _matches| {
-            println!("Running bar, env = {}", args);
-        })
+mod bar {
+    pub fn cmd<'a>() -> Command<'a, str> {
+        Command::new("bar")
+            .description("Shows bar")
+            .runner(|args, _matches| {
+                println!("Running bar, env = {}", args);
+            })
+    }
 }
 
-// main.rs
 fn main() {
     Commander::new()
         .options(|app| {
@@ -85,8 +86,8 @@ fn main() {
             )
         })
         .args(|_args, matches| matches.value_of("environment").unwrap_or("dev"))
-        .add_cmd(foo::foo())
-        .add_cmd(bar::bar())
+        .add_cmd(foo::cmd())
+        .add_cmd(bar::cmd())
         .no_cmd(|_args, _matches| {
             println!("No subcommand matched.");
         })
@@ -97,11 +98,6 @@ fn main() {
 Compared to the normal way using [`clap`][clap] directly:
 
 ```rust
-#[macro_use]
-extern crate clap;
-
-use clap::{AppSettings, Arg, SubCommand};
-
 fn main() {
     let matches = clap::app_from_crate!()
         .global_setting(AppSettings::GlobalVersion)
@@ -146,12 +142,7 @@ fn main() {
 }
 ```
 
-Kindly see:
-
-* [`examples/clap_nested.rs`](examples/clap_nested.rs)
-(together with [`examples/foo.rs`](examples/foo.rs) and [`examples/bar.rs`](examples/bar.rs));
-* and [`examples/clap.rs`](examples/clap.rs)
-
-for comparison.
+Kindly see [`examples/clap_nested.rs`](examples/clap_nested.rs)
+and [`examples/clap.rs`](examples/clap.rs) for comparison.
 
 [clap]: https://github.com/clap-rs/clap
