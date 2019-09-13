@@ -96,6 +96,19 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
         self
     }
 
+    pub fn args<U: ?Sized>(
+        self,
+        args: impl for<'x> Fn(&'x S, &'x ArgMatches<'_>) -> &'x U + 'a,
+    ) -> Commander<'a, S, U> {
+        Commander {
+            opts: self.opts,
+            args: Box::new(args),
+            // All other settings are reset.
+            cmds: Vec::new(),
+            no_cmd: None,
+        }
+    }
+
     pub fn add_cmd(mut self, cmd: impl CommandLike<T> + 'a) -> Self {
         self.cmds.push(Box::new(cmd));
         self
@@ -205,7 +218,7 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
     }
 
     fn eprintln_help(&self, mut help: &Help, path: &[&str]) {
-        use ::std::io::Write;
+        use std::io::Write;
 
         for &segment in path {
             match help.cmds.get(segment) {
