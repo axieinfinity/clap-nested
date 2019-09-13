@@ -7,7 +7,7 @@ license = "MIT"
 homepage = "https://github.com/skymavis/clap-nested"
 repository = "https://github.com/skymavis/clap-nested"
 categories = ["command-line-interface"]
-keywords = ["clap", "clap-rs", "nested", "multi-level", "cli", "command-line"]
+keywords = ["clap", "clap-rs", "multi-level", "cli", "subcommand"]
 include = ["src/**/*", "LICENSE", "README.md"]
 readme = "README.md"
 
