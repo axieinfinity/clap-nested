@@ -28,5 +28,5 @@ fn main() {
             println!("No subcommand matched.");
             Ok(())
         })
-        .run(&());
+        .run();
 }

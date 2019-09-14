@@ -139,71 +139,6 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
             .fold(app, |app, cmd| app.subcommand(cmd.app()))
     }
 
-    pub fn run(&self, args: &S) {
-        let mut app = self.app();
-
-        // Infer binary name
-        if let Some(name) = std::env::args_os().next() {
-            let path = std::path::Path::new(&name);
-
-            if let Some(filename) = path.file_name() {
-                if let Some(binary_name) = filename.to_os_string().to_str() {
-                    if app.p.meta.bin_name.is_none() {
-                        app.p.meta.bin_name = Some(binary_name.to_owned());
-                    }
-                }
-            }
-        }
-
-        let mut tmp = Vec::new();
-        // This hack is used to propagate all needed information to subcommands.
-        app.p.gen_completions_to(clap::Shell::Bash, &mut tmp);
-
-        let help = Help::from(&app);
-
-        match app.get_matches_safe() {
-            Ok(matches) => self.run_with_data(args, &matches, &help),
-            Err(err) => match err.kind {
-                clap::ErrorKind::HelpDisplayed | clap::ErrorKind::VersionDisplayed => err.exit(),
-                _ => {
-                    let mut msg = err.message;
-
-                    if let Some(index) = msg.find("\nUSAGE") {
-                        let usage = msg.split_off(index);
-                        let mut lines = usage.lines();
-
-                        eprintln!("{}", msg);
-
-                        lines.next();
-                        lines.next();
-
-                        loop {
-                            if let Some(usage) = lines.next() {
-                                let mut usage = usage.to_owned();
-
-                                if let Some(index) = usage.find("[") {
-                                    usage.truncate(index);
-                                }
-
-                                let mut path: Vec<_> = usage.split_whitespace().collect();
-
-                                if path.len() > 0 {
-                                    path.remove(0);
-                                    self.eprintln_help(&help, &path);
-                                    break;
-                                }
-                            }
-
-                            eprintln!("{}", usage);
-                        }
-                    } else {
-                        eprintln!("{}", msg);
-                    }
-                }
-            },
-        }
-    }
-
     fn run_with_data(&self, args: &S, matches: &ArgMatches<'_>, help: &Help) {
         let args = (self.args)(args, matches);
 
@@ -243,6 +178,73 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
             name,
             desc: None,
             cmd: self,
+        }
+    }
+}
+
+impl<'a, T: ?Sized> Commander<'a, (), T> {
+    pub fn run(&self) {
+        let mut app = self.app();
+
+        // Infer binary name
+        if let Some(name) = std::env::args_os().next() {
+            let path = std::path::Path::new(&name);
+
+            if let Some(filename) = path.file_name() {
+                if let Some(binary_name) = filename.to_os_string().to_str() {
+                    if app.p.meta.bin_name.is_none() {
+                        app.p.meta.bin_name = Some(binary_name.to_owned());
+                    }
+                }
+            }
+        }
+
+        let mut tmp = Vec::new();
+        // This hack is used to propagate all needed information to subcommands.
+        app.p.gen_completions_to(clap::Shell::Bash, &mut tmp);
+
+        let help = Help::from(&app);
+
+        match app.get_matches_safe() {
+            Ok(matches) => self.run_with_data(&(), &matches, &help),
+            Err(err) => match err.kind {
+                clap::ErrorKind::HelpDisplayed | clap::ErrorKind::VersionDisplayed => err.exit(),
+                _ => {
+                    let mut msg = err.message;
+
+                    if let Some(index) = msg.find("\nUSAGE") {
+                        let usage = msg.split_off(index);
+                        let mut lines = usage.lines();
+
+                        eprintln!("{}", msg);
+
+                        lines.next();
+                        lines.next();
+
+                        loop {
+                            if let Some(usage) = lines.next() {
+                                let mut usage = usage.to_owned();
+
+                                if let Some(index) = usage.find("[") {
+                                    usage.truncate(index);
+                                }
+
+                                let mut path: Vec<_> = usage.split_whitespace().collect();
+
+                                if path.len() > 0 {
+                                    path.remove(0);
+                                    self.eprintln_help(&help, &path);
+                                    break;
+                                }
+                            }
+
+                            eprintln!("{}", usage);
+                        }
+                    } else {
+                        eprintln!("{}", msg);
+                    }
+                }
+            },
         }
     }
 }
@@ -334,7 +336,5 @@ fn two_level_commander() {
             Ok(())
         });
 
-    let main = Commander::new().add_cmd(show).add_cmd(what);
-
-    main.run(&());
+    Commander::new().add_cmd(show).add_cmd(what).run();
 }
