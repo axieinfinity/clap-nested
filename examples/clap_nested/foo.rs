@@ -1,7 +1,7 @@
 use clap::Arg;
 use clap_nested::Command;
 
-pub fn cmd<'a>() -> Command<'a, str> {
+pub fn get_cmd<'a>() -> Command<'a, str> {
     Command::new("foo")
         .description("Shows foo")
         .options(|app| {

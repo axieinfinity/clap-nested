@@ -45,7 +45,7 @@ With `clap-nested`, we can write it in a more organized way:
 
 ```rust
 // foo.rs
-pub fn cmd<'a>() -> Command<'a, str> {
+pub fn get_cmd<'a>() -> Command<'a, str> {
     Command::new(file_stem!())
         .description("Shows foo")
         .options(|app| {
@@ -63,7 +63,7 @@ pub fn cmd<'a>() -> Command<'a, str> {
 }
 
 // bar.rs
-pub fn cmd<'a>() -> Command<'a, str> {
+pub fn get_cmd<'a>() -> Command<'a, str> {
     Command::new(file_stem!())
         .description("Shows bar")
         .runner(|args, _matches| {
@@ -87,8 +87,8 @@ fn main() {
             )
         })
         .args(|_args, matches| matches.value_of("environment").unwrap_or("dev"))
-        .add_cmd(foo::cmd())
-        .add_cmd(bar::cmd())
+        .add_cmd(foo::get_cmd())
+        .add_cmd(bar::get_cmd())
         .no_cmd(|_args, _matches| {
             println!("No subcommand matched.");
             Ok(())

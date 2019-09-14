@@ -22,8 +22,8 @@ fn main() {
             )
         })
         .args(|_args, matches| matches.value_of("environment").unwrap_or("dev"))
-        .add_cmd(foo::cmd())
-        .add_cmd(bar::cmd())
+        .add_cmd(foo::get_cmd())
+        .add_cmd(bar::get_cmd())
         .no_cmd(|_args, _matches| {
             println!("No subcommand matched.");
             Ok(())

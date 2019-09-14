@@ -1,6 +1,6 @@
 use clap_nested::Command;
 
-pub fn cmd<'a>() -> Command<'a, str> {
+pub fn get_cmd<'a>() -> Command<'a, str> {
     Command::new("bar")
         .description("Shows bar")
         .runner(|args, _matches| {
