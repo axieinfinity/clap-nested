@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::ffi::OsString;
 
 extern crate clap;
 
@@ -181,6 +182,13 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
 
 impl<'a, T: ?Sized> Commander<'a, (), T> {
     pub fn run(&self) -> Result {
+        self.run_with_args(std::env::args_os())
+    }
+
+    pub fn run_with_args(
+        &self,
+        args: impl IntoIterator<Item = impl Into<OsString> + Clone>,
+    ) -> Result {
         let mut app = self.app();
 
         // Infer binary name
@@ -202,7 +210,7 @@ impl<'a, T: ?Sized> Commander<'a, (), T> {
 
         let help = Help::from(&app);
 
-        match app.get_matches_safe() {
+        match app.get_matches_from_safe(args) {
             Ok(matches) => self.run_with_data(&(), &matches, &help),
             Err(err) => match err.kind {
                 clap::ErrorKind::HelpDisplayed | clap::ErrorKind::VersionDisplayed => err.exit(),
