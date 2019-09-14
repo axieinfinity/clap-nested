@@ -6,13 +6,13 @@ use clap::{App, ArgMatches, SubCommand};
 
 mod macros;
 
-type Result = core::result::Result<(), Box<dyn std::error::Error + Send>>;
+type Result = core::result::Result<(), Box<dyn std::error::Error + Send + Sync>>;
 
 #[doc(hidden)]
 pub trait CommandLike<T: ?Sized> {
     fn name(&self) -> &str;
     fn app(&self) -> App;
-    fn run(&self, args: &T, matches: &ArgMatches<'_>, help: &Help);
+    fn run(&self, args: &T, matches: &ArgMatches<'_>, help: &Help) -> Result;
 }
 
 pub struct Command<'a, T: ?Sized> {
@@ -67,13 +67,12 @@ impl<'a, T: ?Sized> CommandLike<T> for Command<'a, T> {
         app
     }
 
-    fn run(&self, args: &T, matches: &ArgMatches<'_>, _help: &Help) {
+    fn run(&self, args: &T, matches: &ArgMatches<'_>, _help: &Help) -> Result {
         if let Some(runner) = &self.runner {
-            match runner(args, matches) {
-                Ok(()) => (),
-                Err(err) => panic!(err),
-            }
+            runner(args, matches)?;
         }
+
+        Ok(())
     }
 }
 
@@ -139,7 +138,7 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
             .fold(app, |app, cmd| app.subcommand(cmd.app()))
     }
 
-    fn run_with_data(&self, args: &S, matches: &ArgMatches<'_>, help: &Help) {
+    fn run_with_data(&self, args: &S, matches: &ArgMatches<'_>, help: &Help) -> Result {
         let args = (self.args)(args, matches);
 
         for cmd in &self.cmds {
@@ -150,12 +149,10 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
         }
 
         if let Some(no_cmd) = &self.no_cmd {
-            match no_cmd(args, matches) {
-                Ok(()) => (),
-                Err(err) => panic!(err),
-            }
+            no_cmd(args, matches)
         } else {
             self.eprintln_help(&help, &[]);
+            Ok(())
         }
     }
 
@@ -183,7 +180,7 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
 }
 
 impl<'a, T: ?Sized> Commander<'a, (), T> {
-    pub fn run(&self) {
+    pub fn run(&self) -> Result {
         let mut app = self.app();
 
         // Infer binary name
@@ -243,6 +240,8 @@ impl<'a, T: ?Sized> Commander<'a, (), T> {
                     } else {
                         eprintln!("{}", msg);
                     }
+
+                    Ok(())
                 }
             },
         }
@@ -277,8 +276,8 @@ impl<'a, S: ?Sized, T: ?Sized> CommandLike<S> for MultiCommand<'a, S, T> {
         app
     }
 
-    fn run(&self, args: &S, matches: &ArgMatches<'_>, help: &Help) {
-        self.cmd.run_with_data(args, matches, help);
+    fn run(&self, args: &S, matches: &ArgMatches<'_>, help: &Help) -> Result {
+        self.cmd.run_with_data(args, matches, help)
     }
 }
 
@@ -304,7 +303,7 @@ impl Help {
 }
 
 #[test]
-fn two_level_commander() {
+fn two_level_commander() -> Result {
     let foo = Command::new("foo")
         .description("Shows foo")
         .runner(|args, matches| {
@@ -336,5 +335,5 @@ fn two_level_commander() {
             Ok(())
         });
 
-    Commander::new().add_cmd(show).add_cmd(what).run();
+    Commander::new().add_cmd(show).add_cmd(what).run()
 }

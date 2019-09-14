@@ -8,7 +8,7 @@ use clap_nested::Commander;
 mod bar;
 mod foo;
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     Commander::new()
         .options(|app| {
             app.arg(
@@ -28,5 +28,5 @@ fn main() {
             println!("No subcommand matched.");
             Ok(())
         })
-        .run();
+        .run()
 }
