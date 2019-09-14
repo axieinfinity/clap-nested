@@ -16,6 +16,7 @@ all-features = true
 
 [badges]
 travis-ci = { repository = "skymavis/clap-nested", branch = "master" }
+coveralls = { repository = "skymavis/clap-nested", branch = "master" }
 is-it-maintained-issue-resolution = { repository = "skymavis/clap-nested" }
 is-it-maintained-open-issues = { repository = "skymavis/clap-nested" }
 maintenance = { status = "passively-maintained" }
