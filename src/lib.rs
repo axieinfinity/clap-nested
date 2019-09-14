@@ -231,10 +231,10 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
         eprintln!();
     }
 
-    pub fn into_cmd(self, name: &'a str, desc: &'a str) -> MultiCommand<'a, S, T> {
+    pub fn into_cmd(self, name: &'a str) -> MultiCommand<'a, S, T> {
         MultiCommand {
             name,
-            desc,
+            desc: None,
             cmd: self,
         }
     }
@@ -242,8 +242,15 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
 
 pub struct MultiCommand<'a, S: ?Sized, T: ?Sized> {
     name: &'a str,
-    desc: &'a str,
+    desc: Option<&'a str>,
     cmd: Commander<'a, S, T>,
+}
+
+impl<'a, S: ?Sized, T: ?Sized> MultiCommand<'a, S, T> {
+    pub fn description(mut self, desc: impl Into<&'a str>) -> Self {
+        self.desc = Some(desc.into());
+        self
+    }
 }
 
 impl<'a, S: ?Sized, T: ?Sized> CommandLike<S> for MultiCommand<'a, S, T> {
@@ -252,7 +259,13 @@ impl<'a, S: ?Sized, T: ?Sized> CommandLike<S> for MultiCommand<'a, S, T> {
     }
 
     fn app(&self) -> App {
-        self.cmd.app().name(self.name).about(self.desc)
+        let mut app = self.cmd.app().name(self.name);
+
+        if let Some(desc) = self.desc {
+            app = app.about(desc);
+        }
+
+        app
     }
 
     fn run(&self, args: &S, matches: &ArgMatches<'_>, help: &Help) {
@@ -301,7 +314,8 @@ fn two_level_commander() {
         .no_cmd(|args, matches| {
             println!("show: {:?} {:?}", args, matches);
         })
-        .into_cmd("show", "Shows things");
+        .into_cmd("show")
+        .description("Shows things");
 
     let what = Command::new("what")
         .description("So what")
