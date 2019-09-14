@@ -2,6 +2,8 @@ extern crate clap_nested;
 
 use clap_nested::{Command, Commander};
 
+// TODO(trung): Test for stdout and stderr after commands are run.
+
 #[test]
 fn two_level_commander() {
     let foo = Command::new("foo")

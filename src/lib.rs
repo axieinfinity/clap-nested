@@ -192,6 +192,7 @@ impl<'a, T: ?Sized> Commander<'a, (), T> {
         let mut app = self.app();
 
         // Infer binary name
+        // TODO(trung): Fix that binary name here doesn't match in case of passing custom arguments.
         if let Some(name) = std::env::args_os().next() {
             let path = std::path::Path::new(&name);
 
@@ -206,6 +207,7 @@ impl<'a, T: ?Sized> Commander<'a, (), T> {
 
         let mut tmp = Vec::new();
         // This hack is used to propagate all needed information to subcommands.
+        // TODO(trung): Also propagate author value down to subcommands.
         app.p.gen_completions_to(clap::Shell::Bash, &mut tmp);
 
         let help = Help::from(&app);
