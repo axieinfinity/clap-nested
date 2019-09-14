@@ -26,6 +26,7 @@ fn main() {
         .add_cmd(bar::cmd())
         .no_cmd(|_args, _matches| {
             println!("No subcommand matched.");
+            Ok(())
         })
         .run(&());
 }

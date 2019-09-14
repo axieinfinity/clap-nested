@@ -14,5 +14,6 @@ pub fn cmd<'a>() -> Command<'a, str> {
         .runner(|args, matches| {
             let debug = clap::value_t!(matches, "debug", bool).unwrap_or_default();
             println!("Running foo, env = {}, debug = {}", args, debug);
+            Ok(())
         })
 }

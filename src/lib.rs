@@ -6,6 +6,8 @@ use clap::{App, ArgMatches, SubCommand};
 
 mod macros;
 
+type Result = core::result::Result<(), Box<dyn std::error::Error + Send>>;
+
 #[doc(hidden)]
 pub trait CommandLike<T: ?Sized> {
     fn name(&self) -> &str;
@@ -17,7 +19,7 @@ pub struct Command<'a, T: ?Sized> {
     name: &'a str,
     desc: Option<&'a str>,
     opts: Option<Box<dyn for<'x, 'y> Fn(App<'x, 'y>) -> App<'x, 'y> + 'a>>,
-    runner: Option<Box<dyn Fn(&T, &ArgMatches<'_>) + 'a>>,
+    runner: Option<Box<dyn Fn(&T, &ArgMatches<'_>) -> Result + 'a>>,
 }
 
 impl<'a, T: ?Sized> Command<'a, T> {
@@ -40,7 +42,7 @@ impl<'a, T: ?Sized> Command<'a, T> {
         self
     }
 
-    pub fn runner(mut self, run: impl Fn(&T, &ArgMatches<'_>) + 'a) -> Self {
+    pub fn runner(mut self, run: impl Fn(&T, &ArgMatches<'_>) -> Result + 'a) -> Self {
         self.runner = Some(Box::new(run));
         self
     }
@@ -67,7 +69,10 @@ impl<'a, T: ?Sized> CommandLike<T> for Command<'a, T> {
 
     fn run(&self, args: &T, matches: &ArgMatches<'_>, _help: &Help) {
         if let Some(runner) = &self.runner {
-            runner(args, matches)
+            match runner(args, matches) {
+                Ok(()) => (),
+                Err(err) => panic!(err),
+            }
         }
     }
 }
@@ -76,7 +81,7 @@ pub struct Commander<'a, S: ?Sized, T: ?Sized> {
     opts: Option<Box<dyn for<'x, 'y> Fn(App<'x, 'y>) -> App<'x, 'y> + 'a>>,
     args: Box<dyn for<'x> Fn(&'x S, &'x ArgMatches<'_>) -> &'x T + 'a>,
     cmds: Vec<Box<dyn CommandLike<T> + 'a>>,
-    no_cmd: Option<Box<dyn Fn(&T, &ArgMatches<'_>) + 'a>>,
+    no_cmd: Option<Box<dyn Fn(&T, &ArgMatches<'_>) -> Result + 'a>>,
 }
 
 impl<'a, S: ?Sized> Commander<'a, S, S> {
@@ -114,7 +119,7 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
         self
     }
 
-    pub fn no_cmd(mut self, no_cmd: impl Fn(&T, &ArgMatches<'_>) + 'a) -> Self {
+    pub fn no_cmd(mut self, no_cmd: impl Fn(&T, &ArgMatches<'_>) -> Result + 'a) -> Self {
         self.no_cmd = Some(Box::new(no_cmd));
         self
     }
@@ -138,8 +143,8 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
         let mut app = self.app();
 
         // Infer binary name
-        if let Some(name) = ::std::env::args_os().next() {
-            let path = ::std::path::Path::new(&name);
+        if let Some(name) = std::env::args_os().next() {
+            let path = std::path::Path::new(&name);
 
             if let Some(filename) = path.file_name() {
                 if let Some(binary_name) = filename.to_os_string().to_str() {
@@ -205,13 +210,15 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
         for cmd in &self.cmds {
             if let Some(matches) = matches.subcommand_matches(cmd.name()) {
                 let help = help.cmds.get(cmd.name()).unwrap();
-                cmd.run(args, matches, help);
-                return;
+                return cmd.run(args, matches, help);
             }
         }
 
         if let Some(no_cmd) = &self.no_cmd {
-            no_cmd(args, matches);
+            match no_cmd(args, matches) {
+                Ok(()) => (),
+                Err(err) => panic!(err),
+            }
         } else {
             self.eprintln_help(&help, &[]);
         }
@@ -227,7 +234,7 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
             }
         }
 
-        ::std::io::stderr().write_all(&help.data).unwrap();
+        std::io::stderr().write_all(&help.data).unwrap();
         eprintln!();
     }
 
@@ -300,12 +307,14 @@ fn two_level_commander() {
         .description("Shows foo")
         .runner(|args, matches| {
             println!("foo: {:?} {:?}", args, matches);
+            Ok(())
         });
 
     let bar = Command::new("bar")
         .description("Shows bar")
         .runner(|args, matches| {
             println!("bar: {:?} {:?}", args, matches);
+            Ok(())
         });
 
     let show = Commander::new()
@@ -313,6 +322,7 @@ fn two_level_commander() {
         .add_cmd(bar)
         .no_cmd(|args, matches| {
             println!("show: {:?} {:?}", args, matches);
+            Ok(())
         })
         .into_cmd("show")
         .description("Shows things");
@@ -321,6 +331,7 @@ fn two_level_commander() {
         .description("So what")
         .runner(|args, matches| {
             println!("what: {:?} {:?}", args, matches);
+            Ok(())
         });
 
     let main = Commander::new().add_cmd(show).add_cmd(what);
