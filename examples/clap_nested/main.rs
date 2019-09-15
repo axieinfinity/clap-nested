@@ -8,7 +8,7 @@ use clap_nested::Commander;
 mod bar;
 mod foo;
 
-fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+fn main() {
     Commander::new()
         .options(|app| {
             app.arg(
@@ -29,4 +29,5 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
             Ok(())
         })
         .run()
+        .unwrap();
 }
