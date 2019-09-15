@@ -7,7 +7,7 @@ use clap::{App, ArgMatches, SubCommand};
 
 mod macros;
 
-type Result = core::result::Result<(), Box<dyn std::error::Error + Send + Sync>>;
+type Result = std::result::Result<(), Box<dyn std::error::Error + Send + Sync>>;
 
 #[doc(hidden)]
 pub trait CommandLike<T: ?Sized> {
@@ -163,7 +163,7 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
         for &segment in path {
             match help.cmds.get(segment) {
                 Some(inner) => help = inner,
-                None => return,
+                None => unreachable!("Bad help structure (doesn't match with path)"),
             }
         }
 
@@ -231,6 +231,7 @@ impl<'a, T: ?Sized> Commander<'a, (), T> {
                 clap::ErrorKind::HelpDisplayed | clap::ErrorKind::VersionDisplayed => err.exit(),
                 _ => {
                     let mut msg = err.message;
+                    let mut help_printed = false;
 
                     if let Some(index) = msg.find("\nUSAGE") {
                         let usage = msg.split_off(index);
@@ -241,27 +242,25 @@ impl<'a, T: ?Sized> Commander<'a, (), T> {
                         lines.next();
                         lines.next();
 
-                        loop {
-                            if let Some(usage) = lines.next() {
-                                let mut usage = usage.to_owned();
+                        if let Some(usage) = lines.next() {
+                            let mut usage = usage.to_owned();
 
-                                if let Some(index) = usage.find("[") {
-                                    usage.truncate(index);
-                                }
-
-                                let mut path: Vec<_> = usage.split_whitespace().collect();
-
-                                if path.len() > 0 {
-                                    path.remove(0);
-                                    self.eprintln_help(&help, &path);
-                                    break;
-                                }
+                            if let Some(index) = usage.find("[") {
+                                usage.truncate(index);
                             }
 
-                            eprintln!("{}", usage);
+                            let mut path: Vec<_> = usage.split_whitespace().collect();
+
+                            if path.len() > 0 {
+                                path.remove(0);
+                                self.eprintln_help(&help, &path);
+                                help_printed = true;
+                            }
                         }
-                    } else {
-                        eprintln!("{}", msg);
+                    }
+
+                    if !help_printed {
+                        unreachable!("The help message from clap is missing a usage section.");
                     }
 
                     Ok(())

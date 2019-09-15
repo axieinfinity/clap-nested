@@ -42,6 +42,6 @@ fn main() {
 
         ("bar", Some(_matches)) => println!("Running bar, env = {}", env),
 
-        _ => println!("No subcommand matched."),
+        _ => println!("No subcommand matched"),
     }
 }

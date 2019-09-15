@@ -25,7 +25,7 @@ fn main() {
         .add_cmd(foo::get_cmd())
         .add_cmd(bar::get_cmd())
         .no_cmd(|_args, _matches| {
-            println!("No subcommand matched.");
+            println!("No subcommand matched");
             Ok(())
         })
         .run()
