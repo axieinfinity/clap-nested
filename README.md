@@ -5,7 +5,7 @@
 [![Build Status](https://travis-ci.com/skymavis/clap-nested.svg?branch=master)](https://travis-ci.com/skymavis/clap-nested)
 [![Coverage Status](https://coveralls.io/repos/github/skymavis/clap-nested/badge.svg?branch=master)](https://coveralls.io/github/skymavis/clap-nested?branch=master)
 
-A convenient [`clap`][clap] setup for multi-level CLI subcommands.
+Convenient [`clap`][clap] for CLI apps with multi-level subcommands.
 
 * [How to install?](#installation)
 * [Why `clap-nested` exists?](#why)
