@@ -1,13 +1,17 @@
 use std::collections::HashMap;
 use std::ffi::OsString;
+use std::io::Write;
+use std::result::Result as StdResult;
 
 extern crate clap;
 
-use clap::{App, ArgMatches, SubCommand};
+use clap::{
+    App, AppSettings, ArgMatches, Error as ClapError, ErrorKind as ClapErrorKind, SubCommand,
+};
 
 mod macros;
 
-type Result = std::result::Result<(), Box<dyn std::error::Error + Send + Sync>>;
+type Result = StdResult<(), ClapError>;
 
 #[doc(hidden)]
 pub trait CommandLike<T: ?Sized> {
@@ -152,14 +156,18 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
         if let Some(no_cmd) = &self.no_cmd {
             no_cmd(args, matches)
         } else {
-            self.eprintln_help(&help, &[]);
-            Ok(())
+            let mut buf = Vec::new();
+
+            self.write_help(&help, &[], &mut buf);
+
+            Err(ClapError::with_description(
+                &String::from_utf8(buf).unwrap(),
+                ClapErrorKind::HelpDisplayed,
+            ))
         }
     }
 
-    fn eprintln_help(&self, mut help: &Help, path: &[&str]) {
-        use std::io::Write;
-
+    fn write_help(&self, mut help: &Help, path: &[&str], out: &mut impl Write) {
         for &segment in path {
             match help.cmds.get(segment) {
                 Some(inner) => help = inner,
@@ -167,8 +175,7 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
             }
         }
 
-        std::io::stderr().write_all(&help.data).unwrap();
-        eprintln!();
+        out.write(&help.data).unwrap();
     }
 
     pub fn into_cmd(self, name: &'a str) -> MultiCommand<'a, S, T> {
@@ -216,6 +223,7 @@ impl<'a, T: ?Sized> Commander<'a, (), T> {
 
         let mut tmp = Vec::new();
         // This hack is used to propagate all needed information to subcommands.
+        app.p.set(AppSettings::GlobalVersion);
         app.p.gen_completions_to(clap::Shell::Bash, &mut tmp);
 
         // Also propagate author to subcommands since `clap` doesn't do it
@@ -228,16 +236,18 @@ impl<'a, T: ?Sized> Commander<'a, (), T> {
         match app.get_matches_from_safe(args) {
             Ok(matches) => self.run_with_data(&(), &matches, &help),
             Err(err) => match err.kind {
-                clap::ErrorKind::HelpDisplayed | clap::ErrorKind::VersionDisplayed => err.exit(),
+                clap::ErrorKind::HelpDisplayed | clap::ErrorKind::VersionDisplayed => Err(err),
                 _ => {
                     let mut msg = err.message;
-                    let mut help_printed = false;
+                    let mut buf = Vec::new();
+                    let mut help_captured = false;
 
                     if let Some(index) = msg.find("\nUSAGE") {
                         let usage = msg.split_off(index);
                         let mut lines = usage.lines();
 
-                        eprintln!("{}", msg);
+                        buf.extend_from_slice(msg.as_bytes());
+                        buf.push('\n' as u8);
 
                         lines.next();
                         lines.next();
@@ -253,17 +263,20 @@ impl<'a, T: ?Sized> Commander<'a, (), T> {
 
                             if path.len() > 0 {
                                 path.remove(0);
-                                self.eprintln_help(&help, &path);
-                                help_printed = true;
+                                self.write_help(&help, &path, &mut buf);
+                                help_captured = true;
                             }
                         }
                     }
 
-                    if !help_printed {
+                    if help_captured {
+                        Err(ClapError::with_description(
+                            &String::from_utf8(buf).unwrap(),
+                            ClapErrorKind::HelpDisplayed,
+                        ))
+                    } else {
                         unreachable!("The help message from clap is missing a usage section.");
                     }
-
-                    Ok(())
                 }
             },
         }

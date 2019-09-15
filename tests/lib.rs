@@ -1,16 +1,24 @@
 extern crate clap;
 extern crate clap_nested;
+extern crate regex;
 
 use clap::Arg;
 use clap_nested::{Command, Commander};
 
-// TODO(trung): Test for stdout and stderr after commands are run.
+mod common;
 
-type Result = std::result::Result<(), Box<dyn std::error::Error + Send + Sync>>;
+use common::{assert_output, assert_result};
 
 #[test]
-fn two_level_commander() -> Result {
+fn two_level_commander() {
     let foo = Command::new("foo")
+        .options(|app| {
+            app.arg(
+                Arg::with_name("debug")
+                    .short("d")
+                    .help("Prints debug information verbosely"),
+            )
+        })
         .description("Shows foo")
         .runner(|args, matches| {
             println!("foo: {:?} {:?}", args, matches);
@@ -27,11 +35,16 @@ fn two_level_commander() -> Result {
     let show = Commander::new()
         .options(|app| {
             app.arg(
-                Arg::with_name("debug")
-                    .short("d")
-                    .help("Prints debug information verbosely"),
+                Arg::with_name("environment")
+                    .short("e")
+                    .long("env")
+                    .global(true)
+                    .takes_value(true)
+                    .value_name("STRING")
+                    .help("Sets an environment value, defaults to \"dev\""),
             )
         })
+        .args(|_args, matches| matches.value_of("environment").unwrap_or("dev"))
         .add_cmd(foo)
         .add_cmd(bar)
         .no_cmd(|args, matches| {
@@ -50,45 +63,113 @@ fn two_level_commander() -> Result {
 
     let commander = Commander::new().add_cmd(show).add_cmd(what);
 
-    commander.run_with_args(&["program", "show"])?;
-    commander.run_with_args(&["program", "show", "foo"])?;
-    commander.run_with_args(&["program", "show", "bar"])?;
-    commander.run_with_args(&["program", "show", "bar"])?;
-    commander.run_with_args(&["program", "what"])?;
-    commander.run_with_args(&["program"])?;
-    commander.run()?;
+    assert!(commander.run_with_args(&["program", "show"]).is_ok(), true);
 
-    Ok(())
+    assert!(
+        commander.run_with_args(&["program", "show", "foo"]).is_ok(),
+        true
+    );
+
+    assert!(
+        commander.run_with_args(&["program", "show", "bar"]).is_ok(),
+        true
+    );
+
+    assert!(commander.run_with_args(&["program", "what"]).is_ok(), true);
+
+    assert_result(
+        commander.run(),
+        "error: clap-nested 0.2.1
+Sky Mavis Engineering <engineering@skymavis.com>
+A convenient `clap` setup for multi-level CLI commands.
+
+USAGE:
+    clap_nested-13aa358d293aca54 [SUBCOMMAND]
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+SUBCOMMANDS:
+    help    Prints this message or the help of the given subcommand(s)
+    show    Shows things
+    what    So what",
+        false,
+    );
 }
 
-/*
 #[test]
-#[ignore]
 fn show_help() {
-    Commander::new()
-        .add_cmd(
+    assert_output(
+        &Commander::new().add_cmd(
             Command::new("foo")
                 .description("Shows foo")
                 .runner(|_args, _matches| Ok(())),
-        )
-        .run_with_args(&["test", "foo", "--help"])
-        .unwrap();
+        ),
+        &["program", "foo", "--help"],
+        "program-foo 0.2.1
+Sky Mavis Engineering <engineering@skymavis.com>
+Shows foo
+
+USAGE:
+    program foo
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information",
+        false,
+    );
 }
-*/
 
 #[test]
-fn show_substituted_help() -> Result {
+fn show_substituted_help() {
     let commander = Commander::new().add_cmd(Command::new("foo").description("Shows foo"));
-    commander.run_with_args(&["test", "foo", "-e"])?;
-    commander.run_with_args(&["test", "bar"])?;
-    Ok(())
+
+    assert_output(
+        &commander,
+        &["program", "foo", "-e"],
+        "error: error: Found argument '-e' which wasn't expected, or isn't valid in this context
+
+program-foo 0.2.1
+Sky Mavis Engineering <engineering@skymavis.com>
+Shows foo
+
+USAGE:
+    program foo
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information",
+        false,
+    );
+
+    assert_output(
+        &commander,
+        &["program", "bar"],
+        "error: error: Found argument 'bar' which wasn't expected, or isn't valid in this context
+
+clap-nested 0.2.1
+Sky Mavis Engineering <engineering@skymavis.com>
+A convenient `clap` setup for multi-level CLI commands.
+
+USAGE:
+    program [SUBCOMMAND]
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+SUBCOMMANDS:
+    foo     Shows foo
+    help    Prints this message or the help of the given subcommand(s)",
+        false,
+    );
 }
 
 #[test]
-#[should_panic(expected = "Kind(Other)")]
 fn failed_command() {
-    Commander::new()
-        .add_cmd(
+    assert_output(
+        &Commander::new().add_cmd(
             Command::new("fail")
                 .description("Fails")
                 .options(|app| {
@@ -101,7 +182,9 @@ fn failed_command() {
                 .runner(|_args, _matches| {
                     Err(std::io::Error::from(std::io::ErrorKind::Other).into())
                 }),
-        )
-        .run_with_args(&["test", "fail"])
-        .unwrap();
+        ),
+        &["test", "fail"],
+        "error: other os error",
+        true,
+    );
 }
