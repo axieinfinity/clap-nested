@@ -61,30 +61,24 @@ fn two_level_commander() {
             Ok(())
         });
 
-    let commander = Commander::new().add_cmd(show).add_cmd(what);
+    let commander = Commander::new()
+        .options(|app| app.name("program"))
+        .add_cmd(show)
+        .add_cmd(what);
 
-    assert!(commander.run_with_args(&["program", "show"]).is_ok(), true);
-
-    assert!(
-        commander.run_with_args(&["program", "show", "foo"]).is_ok(),
-        true
-    );
-
-    assert!(
-        commander.run_with_args(&["program", "show", "bar"]).is_ok(),
-        true
-    );
-
-    assert!(commander.run_with_args(&["program", "what"]).is_ok(), true);
+    assert!(commander.run_with_args(&["program", "show"]).is_ok());
+    assert!(commander.run_with_args(&["program", "show", "foo"]).is_ok());
+    assert!(commander.run_with_args(&["program", "show", "bar"]).is_ok());
+    assert!(commander.run_with_args(&["program", "what"]).is_ok());
 
     assert_result(
         commander.run(),
-        "error: clap-nested 0.2.1
-Sky Mavis Engineering <engineering@skymavis.com>
-A convenient `clap` setup for multi-level CLI commands.
+        "error: program __VERSION__
+__AUTHOR__
+__DESC__
 
 USAGE:
-    clap_nested-13aa358d293aca54 [SUBCOMMAND]
+    __BIN_NAME__ [SUBCOMMAND]
 
 FLAGS:
     -h, --help       Prints help information
@@ -99,7 +93,7 @@ SUBCOMMANDS:
 }
 
 #[test]
-fn show_help() {
+fn help() {
     assert_output(
         &Commander::new().add_cmd(
             Command::new("foo")
@@ -107,8 +101,8 @@ fn show_help() {
                 .runner(|_args, _matches| Ok(())),
         ),
         &["program", "foo", "--help"],
-        "program-foo 0.2.1
-Sky Mavis Engineering <engineering@skymavis.com>
+        "program-foo __VERSION__
+__AUTHOR__
 Shows foo
 
 USAGE:
@@ -122,16 +116,18 @@ FLAGS:
 }
 
 #[test]
-fn show_substituted_help() {
-    let commander = Commander::new().add_cmd(Command::new("foo").description("Shows foo"));
+fn substituted_help() {
+    let commander = Commander::new()
+        .options(|app| app.name("program"))
+        .add_cmd(Command::new("foo").description("Shows foo"));
 
     assert_output(
         &commander,
         &["program", "foo", "-e"],
         "error: error: Found argument '-e' which wasn't expected, or isn't valid in this context
 
-program-foo 0.2.1
-Sky Mavis Engineering <engineering@skymavis.com>
+program-foo __VERSION__
+__AUTHOR__
 Shows foo
 
 USAGE:
@@ -148,9 +144,9 @@ FLAGS:
         &["program", "bar"],
         "error: error: Found argument 'bar' which wasn't expected, or isn't valid in this context
 
-clap-nested 0.2.1
-Sky Mavis Engineering <engineering@skymavis.com>
-A convenient `clap` setup for multi-level CLI commands.
+program __VERSION__
+__AUTHOR__
+__DESC__
 
 USAGE:
     program [SUBCOMMAND]
