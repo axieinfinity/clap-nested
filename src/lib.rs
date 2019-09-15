@@ -189,11 +189,12 @@ impl<'a, T: ?Sized> Commander<'a, (), T> {
         &self,
         args: impl IntoIterator<Item = impl Into<OsString> + Clone>,
     ) -> Result {
+        let mut args = args.into_iter().peekable();
         let mut app = self.app();
 
         // Infer binary name
-        // TODO(trung): Fix that binary name here doesn't match in case of passing custom arguments.
-        if let Some(name) = std::env::args_os().next() {
+        if let Some(name) = args.peek() {
+            let name = name.clone().into();
             let path = std::path::Path::new(&name);
 
             if let Some(filename) = path.file_name() {
