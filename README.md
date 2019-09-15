@@ -1,6 +1,7 @@
 # clap-nested
 
 [![Cargo Crate](https://img.shields.io/crates/v/clap-nested.svg)](https://crates.io/crates/clap-nested)
+[![Docs](https://docs.rs/clap-nested/badge.svg)](https://docs.rs/clap-nested)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Build Status](https://travis-ci.com/skymavis/clap-nested.svg?branch=master)](https://travis-ci.com/skymavis/clap-nested)
 [![Coverage Status](https://coveralls.io/repos/github/skymavis/clap-nested/badge.svg?branch=master)](https://coveralls.io/github/skymavis/clap-nested?branch=master)
@@ -9,7 +10,9 @@ Convenient [`clap`][clap] for CLI apps with multi-level subcommands.
 
 * [How to install?](#installation)
 * [Why `clap-nested` exists?](#why)
-* [How to use?](#usage)
+* [Use cases](#use-cases)
+* [Examples](#examples)
+* [Documentation [↪]](https://docs.rs/clap-nested)
 
 ## Installation
 
@@ -40,9 +43,20 @@ file.
 So, we add a little sauce of opinion into [`clap`][clap] to help with that
 awkward process.
 
-## Usage
+## Use cases
 
-With `clap-nested`, we can write it in a more organized way:
+Main use cases of the library, together with explanation, justification,
+and related code examples are below:
+
+* [Easy subcommands and command execution](https://docs.rs/clap-nested#use-case-easy-subcommands-and-command-execution)
+* [Straightforward multi-level subcommands](https://docs.rs/clap-nested#use-case-straightforward-multi-level-subcommands)
+* [Printing help messages directly on errors](https://docs.rs/clap-nested#use-case-printing-help-messages-directly-on-errors)
+
+You can find more in [the documentation](https://docs.rs/clap-nested).
+
+## Examples
+
+With `clap-nested`, we can write in a more organized way:
 
 ```rust
 // foo.rs
