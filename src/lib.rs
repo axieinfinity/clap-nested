@@ -206,10 +206,22 @@ impl<'a, T: ?Sized> Commander<'a, (), T> {
             }
         }
 
+        fn propagate_author<'a>(app: &mut App<'_, 'a>, author: &'a str) {
+            app.p.meta.author = Some(author);
+
+            for subcmd in &mut app.p.subcommands {
+                propagate_author(subcmd, author);
+            }
+        }
+
         let mut tmp = Vec::new();
         // This hack is used to propagate all needed information to subcommands.
-        // TODO(trung): Also propagate author value down to subcommands.
         app.p.gen_completions_to(clap::Shell::Bash, &mut tmp);
+
+        // Also propagate author to subcommands since `clap` doesn't do it
+        if let Some(author) = app.p.meta.author {
+            propagate_author(&mut app, author);
+        }
 
         let help = Help::from(&app);
 
