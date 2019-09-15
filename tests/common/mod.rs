@@ -55,12 +55,15 @@ fn assert_eq_str(left: impl AsRef<str>, right: impl AsRef<str>) {
     let right = regex.replace_all(&right_stripped, "");
 
     if left != right {
-        println!();
-        println!("--> left");
-        println!("{}", left);
-        println!("--> right");
-        println!("{}", right);
-        println!("--");
+        /* println!(
+            "-->left\
+             {}\
+             -->right\
+             {}\
+             --",
+            left, right
+        ); */
+
         assert!(false);
     }
 }

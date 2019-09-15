@@ -95,11 +95,7 @@ SUBCOMMANDS:
 #[test]
 fn help() {
     assert_output(
-        &Commander::new().add_cmd(
-            Command::new("foo")
-                .description("Shows foo")
-                .runner(|_args, _matches| Ok(())),
-        ),
+        &Commander::new().add_cmd(Command::new("foo").description("Shows foo")),
         &["program", "foo", "--help"],
         "program-foo __VERSION__
 __AUTHOR__
