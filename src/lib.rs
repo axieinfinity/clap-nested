@@ -1,3 +1,169 @@
+//! # Convenient `clap` for CLI apps with multi-level subcommands
+//!
+//! `clap-nested` provides a convenient way for setting up CLI apps
+//! with multi-level subcommands.
+//!
+//! We all know that [`clap`][clap] really shines when it comes to
+//! parsing CLI arguments. It even supports nicely formatted help messages,
+//! subcommands, and shell completion out of the box.
+//!
+//! However, [`clap`][clap] is very much unopinionated in how we should
+//! structure and execute logic. Even when we have tens of subcommands
+//! (and arguments!), we still have to manually match against
+//! all possible options and handle them accordingly. That process quickly
+//! becomes tedious and unorganized.
+//!
+//! So, `clap-nested` add a little sauce of opinion into [`clap`][clap]
+//! to help with that.
+//!
+//! # Use case: Easy subcommands and command execution
+//!
+//! In `clap-nested`, commands are defined together with how to execute them.
+//!
+//! Making it that way instead of going through a separate
+//! matching-and-executing block of code like in [`clap`][clap],
+//! it's very natural to separate commands into different files
+//! in an organized and structure way.
+//!
+//! ```
+//! #[macro_use]
+//! extern crate clap;
+//!
+//! use clap::{Arg, ArgMatches};
+//! use clap_nested::{Command, Commander};
+//!
+//! fn main() {
+//!     let foo = Command::new("foo")
+//!         .description("Shows foo")
+//!         .options(|app| {
+//!             app.arg(
+//!                 Arg::with_name("debug")
+//!                     .short("d")
+//!                     .help("Prints debug information verbosely"),
+//!             )
+//!         })
+//!         // Putting argument types here for clarity
+//!         .runner(|args: &str, matches: &ArgMatches<'_>| {
+//!             let debug = clap::value_t!(matches, "debug", bool).unwrap_or_default();
+//!             println!("Running foo, env = {}, debug = {}", args, debug);
+//!             Ok(())
+//!         });
+//!
+//!     let bar = Command::new("bar")
+//!         .description("Shows bar")
+//!         // Putting argument types here for clarity
+//!         .runner(|args: &str, _matches: &ArgMatches<'_>| {
+//!             println!("Running bar, env = {}", args);
+//!             Ok(())
+//!         });
+//!
+//!     Commander::new()
+//!         .options(|app| {
+//!             app.arg(
+//!                 Arg::with_name("environment")
+//!                     .short("e")
+//!                     .long("env")
+//!                     .global(true)
+//!                     .takes_value(true)
+//!                     .value_name("STRING")
+//!                     .help("Sets an environment value, defaults to \"dev\""),
+//!             )
+//!         })
+//!         // `Commander::args()` derives arguments to pass to subcommands.
+//!         // Notice all subcommands (i.e. `foo` and `bar`) will accept `&str` as arguments.
+//!         .args(|_args, matches| matches.value_of("environment").unwrap_or("dev"))
+//!         // Add all subcommands
+//!         .add_cmd(foo)
+//!         .add_cmd(bar)
+//!         // To handle when no subcommands match
+//!         .no_cmd(|_args, _matches| {
+//!             println!("No subcommand matched");
+//!             Ok(())
+//!         })
+//!         .run()
+//!         .unwrap();
+//! }
+//! ```
+//!
+//! # Use case: Straightforward multi-level subcommands
+//!
+//! [`Commander`](struct.Commander.html) acts like a runnable group of commands,
+//! calling [`run`](struct.Commander.html#method.run)
+//! on a [`Commander`](struct.Commander.html)
+//! gets the whole execution process started.
+//!
+//! On the other hand, [`Commander`](struct.Commander.html)
+//! could also be converted into a [`MultiCommand`](struct.MultiCommand.html)
+//! to be further included (and executed)
+//! under another [`Commander`](struct.Commander.html).
+//! This makes writing multi-level subcommands way easy.
+//!
+//! ```
+//! use clap_nested::{Commander, MultiCommand};
+//!
+//! let multi_cmd: MultiCommand<(), ()> = Commander::new()
+//!     // Add some theoretical subcommands
+//!     // .add_cmd(model)
+//!     // .add_cmd(controller)
+//!     // Specify a name for the newly converted command
+//!     .into_cmd("generate")
+//!     // Optionally specify a description
+//!     .description("Generates resources");
+//! ```
+//!
+//! # Use case: Printing help messages directly on errors
+//!
+//! [`clap`][clap] is also the CLI parsing library which powers [Cargo][cargo].
+//!
+//! Sometimes when you run a [Cargo][cargo] command wrongly,
+//! you may see this:
+//!
+//! ```shell
+//! $ cargo run -x
+//! error: Found argument '-x' which wasn't expected, or isn't valid in this context
+//!
+//! USAGE:
+//!     cargo run [OPTIONS] [--] [args]...
+//!
+//! For more information try --help
+//! ```
+//!
+//! While it works and is better for separation of concern
+//! (one command, one job, no suprise effect),
+//! we often wish for more. We want the help message to be printed directly
+//! on errors, so it doesn't take us one more command to show the help message
+//! (and then maybe one more to run the supposedly correct command).
+//!
+//! That's why we take a bit of trade-off to change the default behavior
+//! of [`clap`][clap]. It now works this way:
+//!
+//! ```shell
+//! $ cargo run -x
+//! error: Found argument '-x' which wasn't expected, or isn't valid in this context
+//!
+//! cargo-run
+//! Run a binary or example of the local package
+//!
+//! USAGE:
+//!     cargo run [OPTIONS] [--] [args]...
+//!
+//! OPTIONS:
+//!     -q, --quiet                      No output printed to stdout
+//!         --bin <NAME>...              Name of the bin target to run
+//!         --example <NAME>...          Name of the example target to run
+//!     -p, --package <SPEC>             Package with the target to run
+//!     -j, --jobs <N>                   Number of parallel jobs, defaults to # of CPUs
+//!     <...omitted for brevity...>
+//!
+//! ARGS:
+//!     <args>...
+//!
+//! <...omitted for brevity...>
+//! ```
+//!
+//! [cargo]: https://github.com/rust-lang/cargo
+//! [clap]: https://github.com/clap-rs/clap
+
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::io::Write;
