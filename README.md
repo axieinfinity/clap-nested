@@ -20,7 +20,7 @@ Add `clap-nested` to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-clap-nested = "0.3.0"
+clap-nested = "0.3.1"
 ```
 
 ## Why?
