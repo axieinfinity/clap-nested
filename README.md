@@ -12,7 +12,7 @@ Convenient [`clap`][clap] for CLI apps with multi-level subcommands.
 * [Why `clap-nested` exists?](#why)
 * [Use cases](#use-cases)
 * [Examples](#examples)
-* [Documentation [↪]](https://docs.rs/clap-nested)
+* [Documentation [↗]](https://docs.rs/clap-nested)
 
 ## Installation
 
@@ -45,14 +45,14 @@ awkward process.
 
 ## Use cases
 
-Main use cases of the library, together with explanation, justification,
+Main use cases of `clap-nested`, together with explanation, justification,
 and related code examples are below:
 
 * [Easy subcommands and command execution](https://docs.rs/clap-nested#use-case-easy-subcommands-and-command-execution)
 * [Straightforward multi-level subcommands](https://docs.rs/clap-nested#use-case-straightforward-multi-level-subcommands)
 * [Printing help messages directly on errors](https://docs.rs/clap-nested#use-case-printing-help-messages-directly-on-errors)
 
-You can find more in [the documentation](https://docs.rs/clap-nested).
+You can always find more in [the documentation](https://docs.rs/clap-nested).
 
 ## Examples
 
