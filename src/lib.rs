@@ -23,7 +23,7 @@
 //! Making it that way instead of going through a separate
 //! matching-and-executing block of code like in [`clap`][clap],
 //! it's very natural to separate commands into different files
-//! in an organized and structure way.
+//! in an organized and structured way.
 //!
 //! ```
 //! #[macro_use]

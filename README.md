@@ -45,7 +45,7 @@ awkward process.
 
 ## Use cases
 
-Main use cases of `clap-nested`, together with explanation, justification,
+Main use cases of `clap-nested`, together with explanation, rationale,
 and related code examples are below:
 
 * [Easy subcommands and command execution](https://docs.rs/clap-nested#use-case-easy-subcommands-and-command-execution)
