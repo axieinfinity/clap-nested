@@ -1,3 +1,4 @@
+/// Get filename without extension of the current source file
 #[macro_export]
 macro_rules! file_stem {
     () => {

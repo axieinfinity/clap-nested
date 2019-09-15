@@ -87,8 +87,8 @@
 //!
 //! # Use case: Straightforward multi-level subcommands
 //!
-//! [`Commander`](struct.Commander.html) acts like a runnable group of commands,
-//! calling [`run`](struct.Commander.html#method.run)
+//! [`Commander`](struct.Commander.html) acts like a runnable group
+//! of subcommands, calling [`run`](struct.Commander.html#method.run)
 //! on a [`Commander`](struct.Commander.html)
 //! gets the whole execution process started.
 //!
@@ -186,6 +186,8 @@ pub trait CommandLike<T: ?Sized> {
     fn run(&self, args: &T, matches: &ArgMatches<'_>, help: &Help) -> Result;
 }
 
+/// Define a single-purpose command to be included
+/// in a [`Commander`](struct.Commander.html)
 pub struct Command<'a, T: ?Sized> {
     name: &'a str,
     desc: Option<&'a str>,
@@ -247,6 +249,8 @@ impl<'a, T: ?Sized> CommandLike<T> for Command<'a, T> {
     }
 }
 
+/// Define a group of subcommands to be run directly,
+/// or converted as a whole into a higher-order command
 pub struct Commander<'a, S: ?Sized, T: ?Sized> {
     opts: Option<Box<dyn for<'x, 'y> Fn(App<'x, 'y>) -> App<'x, 'y> + 'a>>,
     args: Box<dyn for<'x> Fn(&'x S, &'x ArgMatches<'_>) -> &'x T + 'a>,
@@ -449,6 +453,8 @@ impl<'a, T: ?Sized> Commander<'a, (), T> {
     }
 }
 
+/// The result of converting a [`Commander`](struct.Commander.html)
+/// into a higher-order command
 pub struct MultiCommand<'a, S: ?Sized, T: ?Sized> {
     name: &'a str,
     desc: Option<&'a str>,
