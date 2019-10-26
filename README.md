@@ -115,4 +115,8 @@ fn main() {
 Kindly see [`examples/clap_nested/`](examples/clap_nested/)
 and [`examples/clap.rs`](examples/clap.rs) for comparison.
 
+## License
+
+[MIT licensed](LICENSE).
+
 [clap]: https://github.com/clap-rs/clap
