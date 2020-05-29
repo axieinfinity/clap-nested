@@ -80,8 +80,7 @@
 //!             println!("No subcommand matched");
 //!             Ok(())
 //!         })
-//!         .run()
-//!         .unwrap();
+//!         .run();
 //! }
 //! ```
 //!
@@ -358,11 +357,19 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
 }
 
 impl<'a, T: ?Sized> Commander<'a, (), T> {
-    pub fn run(&self) -> Result {
-        self.run_with_args(std::env::args_os())
+    pub fn run(&self) {
+        self.run_result().unwrap_or_else(|error| error.exit())
     }
 
-    pub fn run_with_args(
+    pub fn run_with_args(&self, args: impl IntoIterator<Item = impl Into<OsString> + Clone>) {
+        self.run_with_args_result(args).unwrap_or_else(|error| error.exit())
+    }
+
+    pub fn run_result(&self) -> Result {
+        self.run_with_args_result(std::env::args_os())
+    }
+
+    pub fn run_with_args_result(
         &self,
         args: impl IntoIterator<Item = impl Into<OsString> + Clone>,
     ) -> Result {

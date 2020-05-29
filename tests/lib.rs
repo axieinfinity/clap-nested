@@ -66,13 +66,13 @@ fn two_level_commander() {
         .add_cmd(show)
         .add_cmd(what);
 
-    assert!(commander.run_with_args(&["program", "show"]).is_ok());
-    assert!(commander.run_with_args(&["program", "show", "foo"]).is_ok());
-    assert!(commander.run_with_args(&["program", "show", "bar"]).is_ok());
-    assert!(commander.run_with_args(&["program", "what"]).is_ok());
+    assert!(commander.run_with_args_result(&["program", "show"]).is_ok());
+    assert!(commander.run_with_args_result(&["program", "show", "foo"]).is_ok());
+    assert!(commander.run_with_args_result(&["program", "show", "bar"]).is_ok());
+    assert!(commander.run_with_args_result(&["program", "what"]).is_ok());
 
     assert_result(
-        commander.run(),
+        commander.run_result(),
         "error: program __VERSION__
 __AUTHOR__
 __DESC__

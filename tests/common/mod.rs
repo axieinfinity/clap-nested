@@ -14,7 +14,7 @@ pub fn assert_output<T>(
     out: &str,
     use_stderr: bool,
 ) {
-    assert_result(commander.run_with_args(args), out, use_stderr);
+    assert_result(commander.run_with_args_result(args), out, use_stderr);
 }
 
 pub fn assert_result(res: Result<(), clap::Error>, out: &str, use_stderr: bool) {
