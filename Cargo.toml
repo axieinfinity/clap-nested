@@ -1,6 +1,6 @@
 [package]
 name = "clap-nested"
-version = "0.3.1"
+version = "0.4.0"
 description = "Convenient `clap` for CLI apps with multi-level subcommands."
 authors = ["Sky Mavis Engineering <engineering@skymavis.com>"]
 license = "MIT"
