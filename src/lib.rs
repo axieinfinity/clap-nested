@@ -80,8 +80,7 @@
 //!             println!("No subcommand matched");
 //!             Ok(())
 //!         })
-//!         .run()
-//!         .unwrap();
+//!         .run();
 //! }
 //! ```
 //!
@@ -358,8 +357,9 @@ impl<'a, S: ?Sized, T: ?Sized> Commander<'a, S, T> {
 }
 
 impl<'a, T: ?Sized> Commander<'a, (), T> {
-    pub fn run(&self) -> Result {
+    pub fn run(&self) {
         self.run_with_args(std::env::args_os())
+            .unwrap_or_else(|e| e.exit())
     }
 
     pub fn run_with_args(

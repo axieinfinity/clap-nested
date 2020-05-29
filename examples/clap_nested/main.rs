@@ -28,6 +28,5 @@ fn main() {
             println!("No subcommand matched");
             Ok(())
         })
-        .run()
-        .unwrap();
+        .run();
 }

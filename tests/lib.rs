@@ -72,7 +72,7 @@ fn two_level_commander() {
     assert!(commander.run_with_args(&["program", "what"]).is_ok());
 
     assert_result(
-        commander.run(),
+        commander.run_with_args(std::env::args_os()),
         "error: program __VERSION__
 __AUTHOR__
 __DESC__
